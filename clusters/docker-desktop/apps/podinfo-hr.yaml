@@ -1,0 +1,17 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: podinfo
+  namespace: demo
+spec:
+  interval: 1m
+  chart:
+    spec:
+      chart: podinfo
+      sourceRef:
+        kind: HelmRepository
+        name: bitnami
+        namespace: flux-system
+      # version: 6.x.x  # опционально зафиксируй версию
+  values:
+    replicaCount: 2
