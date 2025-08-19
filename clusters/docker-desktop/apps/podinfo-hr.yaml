@@ -10,8 +10,8 @@ spec:
       chart: podinfo
       sourceRef:
         kind: HelmRepository
-        name: bitnami
+        name: podinfo
         namespace: flux-system
-      # version: 6.x.x  # опционально зафиксируй версию
+      # version: "6.x.x"   # можно зафиксировать версию
   values:
     replicaCount: 2
