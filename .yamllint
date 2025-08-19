@@ -1,0 +1,15 @@
+extends: default
+
+# отключим придирки, которые сейчас мешают
+rules:
+  line-length: disable
+  truthy: disable
+  # можно и вовсе ослабить проверку отступов, но лучше — игнор путём ниже
+  # indentation:
+  #   indent-sequences: whatever
+  #   check-multi-line-strings: false
+
+# игнорим всё, что генерит flux bootstrap
+ignore: |
+  clusters/**/flux-system/**
+  **/gotk-*.yaml

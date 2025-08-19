@@ -1,0 +1,43 @@
+name: Lint & Validate Manifests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install tools (kubectl, kustomize, yamllint, kubeconform)
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y python3-pip jq
+          pip install yamllint
+          # kubectl
+          curl -LO "https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+          # kustomize (standalone)
+          curl -Ls https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh | bash
+          sudo mv kustomize /usr/local/bin/
+          # kubeconform
+          curl -L https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz \
+            | sudo tar -xz -C /usr/local/bin kubeconform
+
+      - name: YAML lint
+        run: |
+          yamllint -c .yamllint .
+
+      - name: Validate kustomizations via kubeconform
+        run: |
+          set -e
+          CLUSTERS=("clusters/docker-desktop")
+          for path in "${CLUSTERS[@]}"; do
+            echo "==> Building $path"
+            kustomize build "$path" > /tmp/rendered.yaml
+            echo "==> kubeconform validate $path"
+            kubeconform -summary -ignore-missing-schemas -strict /tmp/rendered.yaml
+          done
